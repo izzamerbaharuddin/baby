@@ -438,7 +438,7 @@ $("gName").textContent=CONFIG.herName;$("gTxt").textContent=CONFIG.gateText;
 $("gate").addEventListener("click",function(){
   this.classList.add("out");window.gateOpen=1;ac();chime(2);document.body.classList.remove("lock");
   window.scrollTo(0,0);
-  if(window.au){try{au.play();$("mus").textContent="Pause"}catch(e){}}
+  startMusic();
 });
 
 /* typewriter */
@@ -570,10 +570,28 @@ addEventListener("pointermove",function(e){if(e.pointerType!=="mouse")return;par
 var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}})},{threshold:.1});
 document.querySelectorAll(".rv").forEach(function(e){io.observe(e)});
 
-/* music */
+/* music — starts automatically after the opening-screen tap */
+var mb=$("mus");
+function startMusic(){
+  if(!window.au)return;
+  var playAttempt=au.play();
+  if(playAttempt&&playAttempt.then){
+    playAttempt.then(function(){mb.textContent="Pause"})
+      .catch(function(){mb.textContent="Play music"});
+  }else{
+    mb.textContent="Pause";
+  }
+}
 if(CONFIG.music){
-  window.au=new Audio(CONFIG.music);au.loop=true;var mb=$("mus");mb.style.display="block";
-  mb.onclick=function(){if(au.paused){au.play();mb.textContent="Pause"}else{au.pause();mb.textContent="Music"}};
+  window.au=new Audio(CONFIG.music);
+  au.loop=true;
+  au.preload="auto";
+  mb.style.display="block";
+  mb.textContent="Pause";
+  mb.onclick=function(){
+    if(au.paused){startMusic()}
+    else{au.pause();mb.textContent="Play music"}
+  };
 }
 
 /* moonlit lake: sky, aurora, glowing daisies with reflections, fireflies, dandelion seeds */
